@@ -8,6 +8,9 @@ const InventorySchema = new mongoose.Schema({
     type: String,
     // required: true,
   },
+  user: {
+    type: String,
+  },
   itemCode: {
     type: Number,
     // unique: true,

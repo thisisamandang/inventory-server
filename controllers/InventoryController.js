@@ -2,17 +2,26 @@ const Inventory = require("../models/InventoryModel");
 
 module.exports.postAddInventory = async (req, res, next) => {
   try {
-    const { itemName, category, itemCode, description, unit, stocks, low } =
-      req.body;
-    // const codeCheck = await inventory.findOne({ itemCode });
-    // if (codeCheck)
-    //   return res.json({
-    //     msg: "Item code that you have entered already exists you can update stock of that item directly.",
-    //     status: false,
-    //   });
+    const {
+      itemName,
+      category,
+      user,
+      itemCode,
+      description,
+      unit,
+      stocks,
+      low,
+    } = req.body;
+    const codeCheck = await Inventory.findOne({ itemCode });
+    if (codeCheck)
+      return res.json({
+        msg: "Item code needs to be unique.",
+        status: false,
+      });
     const inventory = await Inventory.create({
       itemName,
       category,
+      user,
       itemCode,
       description,
       unit,
@@ -27,9 +36,9 @@ module.exports.postAddInventory = async (req, res, next) => {
 
 module.exports.getInventory = async (req, res, next) => {
   try {
-    const { user } = req.body;
+    const { userid } = req.params;
     const inventoryItems = await Inventory.find({
-      _id: { $ne: req.params.id },
+      user: userid,
     }).select([
       "itemName",
       "category",
@@ -40,6 +49,44 @@ module.exports.getInventory = async (req, res, next) => {
       "low",
     ]);
     return res.json(inventoryItems);
+  } catch (ex) {
+    next(ex);
+  }
+};
+
+module.exports.postDeleteItem = (req, res, next) => {
+  try {
+    const codeID = req.body.code;
+    console.log(codeID);
+    Inventory.findOneAndRemove(codeID).then(() => {
+      console.log("Deleted");
+    });
+  } catch (ex) {
+    next(ex);
+  }
+};
+
+module.exports.updateItem = (req, res, next) => {
+  try {
+    const codeid = req.body.updationCode;
+    // const { itemName, category, user, description} =
+    //   req.body;
+    const UpdateditemName = req.body.productId;
+    const UpdatedCategory = req.body.category;
+    const UpdatedDescription = req.body.description;
+
+    console.log(codeid);
+    Inventory.findById(codeid)
+      .then((inventory) => {
+        inventory.itemName = UpdateditemName;
+        inventory.category = UpdatedCategory;
+        inventory.description = UpdatedDescription;
+        return inventory.save();
+      })
+      .then((result) => {
+        console.log("Updated Inventory");
+      });
+    // return res.json({ status: true, Inventory });
   } catch (ex) {
     next(ex);
   }
