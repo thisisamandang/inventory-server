@@ -132,17 +132,16 @@ module.exports.getLowStock = async (req, res, next) => {
     const { userid } = req.params;
     const inventoryItems = await Inventory.find({
       user: userid,
-    })
-      .$where("this.stocks < this.low")
-      .select([
-        "itemName",
-        "category",
-        "itemCode",
-        "description",
-        "unit",
-        "stocks",
-        "low",
-      ]);
+      stocks: { $lt: { $expr: "$low" } },
+    }).select([
+      "itemName",
+      "category",
+      "itemCode",
+      "description",
+      "unit",
+      "stocks",
+      "low",
+    ]);
     return res.json(inventoryItems);
   } catch (ex) {
     next(ex);
