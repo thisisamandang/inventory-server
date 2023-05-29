@@ -13,17 +13,21 @@ const InventorySchema = new mongoose.Schema({
   },
   itemCode: {
     type: Number,
-    // unique: true,
+    required: true,
+    unique: true,
   },
   description: {
     type: String,
+    default: "",
   },
   unit: {
     type: String,
+
     // required: true,
   },
   stocks: {
     type: Number,
+    required: true,
   },
   low: {
     type: Number,
