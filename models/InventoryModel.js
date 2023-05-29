@@ -22,7 +22,7 @@ const InventorySchema = new mongoose.Schema({
   },
   unit: {
     type: String,
-
+    default: "UNITS",
     // required: true,
   },
   stocks: {

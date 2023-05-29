@@ -25,6 +25,12 @@ module.exports.postAddInventory = async (req, res, next) => {
         status: false,
       });
     }
+    if (!itemName) {
+      return res.json({
+        msg: "Please Provide an Item Name",
+        status: false,
+      });
+    }
 
     const codeCheck = await Inventory.findOne({ itemCode });
     if (codeCheck)
@@ -80,81 +86,6 @@ module.exports.postDeleteItem = (req, res, next) => {
   }
 };
 
-// module.exports.updateItem = (req, res, next) => {
-//   try {
-//     const codeid = req.params.updationCode;
-//     console.log(codeid);
-//     // const UpdateditemName=req.body.
-//     const { UpdateditemName, UpdatedCategory, UpdatedDescription } = req.body;
-//     console.log(UpdateditemName, UpdatedCategory, UpdatedDescription);
-//     Inventory.findOneAndUpdate(
-//       { _id: codeid },
-//       {
-//         itemName: UpdateditemName,
-//         category: UpdatedCategory,
-//         // description: UpdatedDescription,
-//       }
-//     )
-//       // .then((inventory) => {
-//       //   console.log(inventory);
-//       //   if (!inventory) {
-//       //     return res.status(404).json({ error: "Item not found" });
-//       //   }
-
-//       //   inventory.itemName = UpdateditemName;
-//       //   inventory.category = UpdatedCategory;
-//       //   inventory.description = UpdatedDescription;
-
-//       //   return inventory.save();
-//       // })
-//       .then(() => {
-//         console.log("Updated Inventory:");
-//         // return res.json({ status: true, inventory:  });
-//       })
-//       .catch((error) => {
-//         return res
-//           .status(500)
-//           .json({ error: "An error occurred during update" });
-//       });
-//   } catch (ex) {
-//     next(ex);
-//   }
-// };
-
-// module.exports.updateItem = (req, res, next) => {
-//   try {
-//     const codeid = req.params.updationCode;
-//     console.log(codeid);
-//     const { UpdateditemName, UpdatedCategory, UpdatedDescription } = req.body;
-//     console.log(UpdateditemName, UpdatedCategory, UpdatedDescription);
-
-//     Inventory.findOneAndUpdate(
-//       { _id: codeid },
-//       {
-//         itemName: UpdateditemName,
-//         category: UpdatedCategory,
-//         description: UpdatedDescription,
-//       },
-//       { new: true }
-//     )
-//       .then((updatedInventory) => {
-//         if (!updatedInventory) {
-//           console.log("No matching document found");
-//           return res.json({ status: false, error: "No matching document found" });
-//         }
-//         console.log("Updated Inventory:", updatedInventory);
-//         return res.json({ status: true, inventory: updatedInventory });
-//       })
-//       .catch((error) => {
-//         console.log("Error updating document:", error);
-//         return res.status(500).json({ error: "An error occurred during update" });
-//       });
-// };
-
-// const mongoose = require("mongoose");
-
-// const { ObjectId } = require("mongodb");
-
 module.exports.updateItem = (req, res, next) => {
   try {
     const codeid = req.params.updationCode;
@@ -191,6 +122,28 @@ module.exports.updateItem = (req, res, next) => {
           .status(500)
           .json({ error: "An error occurred during update" });
       });
+  } catch (ex) {
+    next(ex);
+  }
+};
+
+module.exports.getLowStock = async (req, res, next) => {
+  try {
+    const { userid } = req.params;
+    const inventoryItems = await Inventory.find({
+      user: userid,
+    })
+      .$where("this.stocks < this.low")
+      .select([
+        "itemName",
+        "category",
+        "itemCode",
+        "description",
+        "unit",
+        "stocks",
+        "low",
+      ]);
+    return res.json(inventoryItems);
   } catch (ex) {
     next(ex);
   }
